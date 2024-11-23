@@ -59,7 +59,7 @@ public class GroupInfoController extends ABaseController{
 		GroupInfo groupInfo=this.groupInfoService.getGroupInfoByGroupId(groupId);
 		if(null==groupInfo||!GroupStatusEnum.NORMAL.getStatus().equals(groupInfo.getStatus())){
 			throw new BusinessException("群聊不存在或已解散");
-		}
+		}1
 		return groupInfo;
 
 	}
