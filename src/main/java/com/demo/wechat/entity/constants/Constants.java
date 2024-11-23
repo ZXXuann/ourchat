@@ -17,4 +17,6 @@ public class Constants {
     public static final String REDIS_KEY_WS_TOKEN_USERID="wechat:ws:token:userid:";
     public static final String ROBOT_UID= UserContactTypeEnum.USER.getPrefix()+"robot";
     public static final String REDIS_KEY_SYS_SETTING="wechat:syssetting:";
+    public static final String FILE_FOLDER_FILE="/file";
+    public static final String FILE_FOLDER_AVATAR_NAME="/avatar";
 }

@@ -1,5 +1,6 @@
 package com.demo.wechat.controller;
 
+import com.demo.wechat.annotation.GlobalInterceptor;
 import com.demo.wechat.entity.constants.Constants;
 import com.demo.wechat.entity.dto.SysSettingDto;
 import com.demo.wechat.entity.dto.TokenUserInfoDto;
@@ -136,6 +137,7 @@ public class AccountController extends ABaseController{
      * @param sysSettingVO
      * @return
      */
+    @GlobalInterceptor
     @RequestMapping("/setSysSetting")
     public ResponseVO setSysSetting(@NotNull SysSettingVO sysSettingVO){
         if(null==sysSettingVO){
