@@ -7,6 +7,9 @@ import cn.hutool.http.server.HttpServerRequest;
 import com.demo.wechat.annotation.GlobalInterceptor;
 import com.demo.wechat.entity.dto.TokenUserInfoDto;
 import com.demo.wechat.entity.po.UserContact;
+import com.demo.wechat.entity.query.UserContactQuery;
+import com.demo.wechat.entity.vo.GroupInfoVo;
+import com.demo.wechat.enums.GroupStatusEnum;
 import com.demo.wechat.exception.BusinessException;
 import com.demo.wechat.service.GroupInfoService;
 import com.demo.wechat.entity.vo.ResponseVO;
@@ -40,9 +43,38 @@ public class GroupInfoController extends ABaseController{
 	private GroupInfoService groupInfoService;
 	@Resource
 	private UserContactService userContactService;
+	@RequestMapping("/getGroupInfo")
+	@GlobalInterceptor
+	public ResponseVO getGroupInfo(HttpServletRequest request,
+								   @NotEmpty String groupId){
+		GroupInfo groupInfo=getGroupDetailCommon(request,groupId);
+		UserContactQuery userContactQuery=new UserContactQuery();
+		userContactQuery.setContactId(groupId);
+		Integer memberCount=this.userContactService.findCountByParam(userContactQuery);
+		groupInfo.setMemberCount(memberCount);
+		return getSuccessResponseVO(groupInfo);
+	}
 	@RequestMapping("/getGroupInfo4Chat")
 	public ResponseVO getGroupInfo4Chat(HttpServletRequest request,
 										@NotEmpty String groupId){
+		//获取组信息
+		GroupInfo groupInfo=getGroupDetailCommon(request, groupId);
+		//创建一个查询类
+		UserContactQuery userContactQuery=new UserContactQuery();
+		//查询同一个群的人
+		userContactQuery.setContactId(groupId);
+		//多表联合查询
+		userContactQuery.setQueryUserInfo(true);
+		//按时间排序
+		userContactQuery.setOrderBy("create_time asc");
+		userContactQuery.setStatus(UserContactStatusEnum.FRIEND.getStatus());
+		//根据上述条件获取所有的信息
+		List<UserContact> userContactList=this.userContactService.findListByParam(userContactQuery);
+		//获取群信息
+		GroupInfoVo groupInfoVo=new GroupInfoVo();
+		groupInfoVo.setGroupInfo(groupInfo);
+		groupInfoVo.setUserContactList(userContactList);
+		return getSuccessResponseVO(groupInfoVo);
 
 	}
 	private GroupInfo getGroupDetailCommon(HttpServletRequest request,
@@ -59,9 +91,8 @@ public class GroupInfoController extends ABaseController{
 		GroupInfo groupInfo=this.groupInfoService.getGroupInfoByGroupId(groupId);
 		if(null==groupInfo||!GroupStatusEnum.NORMAL.getStatus().equals(groupInfo.getStatus())){
 			throw new BusinessException("群聊不存在或已解散");
-		}1
+		}
 		return groupInfo;
-
 	}
 	@RequestMapping("/loadMyGroup")
 	@GlobalInterceptor

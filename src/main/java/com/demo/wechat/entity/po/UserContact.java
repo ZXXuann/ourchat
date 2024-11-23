@@ -30,6 +30,24 @@ public class UserContact implements Serializable {
  	 * 联系人类型 0好友 1群组
  	 */
 	private Integer contactType;
+	private String contactName;
+	private Integer sex;
+
+	public Integer getSex() {
+		return sex;
+	}
+
+	public void setSex(Integer sex) {
+		this.sex = sex;
+	}
+
+	public String getContactName() {
+		return contactName;
+	}
+
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
+	}
 
 	/**
  	 * 创建时间

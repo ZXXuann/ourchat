@@ -30,6 +30,15 @@ public class GroupInfo implements Serializable {
  	 * 群主id
  	 */
 	private String groupOwnerId;
+	private Integer memberCount;
+
+	public Integer getMemberCount() {
+		return memberCount;
+	}
+
+	public void setMemberCount(Integer memberCount) {
+		this.memberCount = memberCount;
+	}
 
 	/**
  	 * 创建时间

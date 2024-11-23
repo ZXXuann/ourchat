@@ -78,9 +78,15 @@
 
 	<!-- 查询列表 -->
 	<select id="selectList" resultMap="base_result_map">
-		SELECT 
+		SELECT c.*
 		<include refid="base_column_list"/>
-			FROM user_contact
+		<if test="query.queryUserInfo">
+			u.nick_name contactName,u.sex sex
+		</if>
+			FROM user_contact c
+		<if test="query.queryUserInfo">
+			inner join user_info u on c.user_id=u.user_id
+		</if>
 		<include refid="query_condition"/>
 		<if test="query.orderBy != null">
 			order by ${query.orderBy}

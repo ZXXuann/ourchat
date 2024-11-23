@@ -35,6 +35,16 @@ public class UserContactQuery extends BaseQuery {
 
 	private String createTimeStart;
 	private String createTimeEnd;
+	private Boolean queryUserInfo;
+
+	public Boolean getQueryUserInfo() {
+		return queryUserInfo;
+	}
+
+	public void setQueryUserInfo(Boolean queryUserInfo) {
+		this.queryUserInfo = queryUserInfo;
+	}
+
 	/**
  	 * 状态 0非好友 1好友 2已删除 3被好友删除 4已拉黑好友 5被好友拉黑 查询对象
  	 */
