@@ -270,7 +270,12 @@
 		<include refid="base_column_list"/> 
 		from user_contact_apply where apply_id =#{applyId}
 	</select>
-
+	<!-- 根据 ApplyUserId ReceiveUserId ContactId  查询 -->
+	<select id="selectByApplyUserIdAndReceiveUserIdAndContactId" resultMap="base_result_map">
+		select
+		<include refid="base_column_list"/>
+		from user_contact_apply where apply_user_id =#{applyUserId}, receive_user_id =#{receiveUserId}, contact_id =#{contactId}
+	</select>
 	<!-- 根据 ApplyId 更新 -->
 	<update id="updateByApplyId" parameterType="com.demo.wechat.entity.po.UserContactApply">
 		update user_contact_apply

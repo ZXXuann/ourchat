@@ -12,6 +12,7 @@ import com.demo.wechat.entity.po.UserContact;
 import com.demo.wechat.entity.query.SimplePage;
 import com.demo.wechat.enums.PageSize;
 import com.demo.wechat.enums.ResponseCodeEnum;
+import com.demo.wechat.enums.UserContactStatusEnum;
 import com.demo.wechat.enums.UserContactTypeEnum;
 import com.demo.wechat.exception.BusinessException;
 import com.demo.wechat.mappers.GroupInfoMapper;

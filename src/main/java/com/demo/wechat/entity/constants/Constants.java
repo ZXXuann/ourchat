@@ -19,4 +19,5 @@ public class Constants {
     public static final String REDIS_KEY_SYS_SETTING="wechat:syssetting:";
     public static final String FILE_FOLDER_FILE="/file";
     public static final String FILE_FOLDER_AVATAR_NAME="/avatar";
+    public static final String APPLY_INFO_TEMPLATE="您好";
 }

@@ -8,6 +8,9 @@ import org.apache.ibatis.annotations.Param;
  * @Date: 2024/11/22 21:01:52
  */
 public interface UserContactApplyMapper<T, P> extends BaseMapper {
+	T selectByApplyUserIdAndReceiveUserIdAndContactId(@Param("applyUserId") String applyUserId,
+													  @Param("receiveUserId") String receiveUserId,
+													  @Param("contactId") String contactId);
 
 	/**
  	 * 根据 ApplyId 查询

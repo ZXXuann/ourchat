@@ -2,6 +2,9 @@ package com.demo.wechat.service;
 
 
 import java.util.List;
+
+import com.demo.wechat.entity.dto.TokenUserInfoDto;
+import com.demo.wechat.entity.dto.UserContactSearchResultDto;
 import com.demo.wechat.entity.vo.PaginationResultVO;
 import com.demo.wechat.entity.po.UserContact;
 import com.demo.wechat.entity.query.UserContactQuery;
@@ -56,4 +59,7 @@ public interface UserContactService{
  	 * 根据 UserIdAndContactId 删除
  	 */
 	Integer deleteUserContactByUserIdAndContactId(String userId, String contactId);
+	UserContactSearchResultDto searchContact(String userId, String contactId);
+	Integer applyAdd(TokenUserInfoDto tokenUserInfoDto,String contactId,String applyInfo);
+
 }

@@ -2,6 +2,12 @@ package com.demo.wechat.controller;
 
 
 import java.util.List;
+
+import com.demo.wechat.annotation.GlobalInterceptor;
+import com.demo.wechat.entity.dto.TokenUserInfoDto;
+import com.demo.wechat.entity.dto.UserContactSearchResultDto;
+import com.demo.wechat.service.InfoService;
+import com.demo.wechat.service.UserContactApplyService;
 import com.demo.wechat.service.UserContactService;
 import com.demo.wechat.entity.vo.ResponseVO;
 import com.demo.wechat.entity.po.UserContact;
@@ -10,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotEmpty;
+
 /**
  * @Description:  Controller
  * @Author: false
@@ -21,7 +30,25 @@ public class UserContactController extends ABaseController{
 
 	@Resource
 	private UserContactService userContactService;
+	@Resource
+	private InfoService userInfoService;
+	@Resource
+	private UserContactApplyService userContactApplyService;
+	@RequestMapping("/applyAdd")
+	@GlobalInterceptor
+	public ResponseVO applyAdd(HttpServletRequest request,@NotEmpty String contactId,String applyInfo){
+		TokenUserInfoDto tokenUserInfoDto=getTokenUserInfo(request);
+		Integer joinType=userContactService.applyAdd(tokenUserInfoDto,contactId,applyInfo);
+		return getSuccessResponseVO(joinType);
+	}
 
+	@RequestMapping("/search")
+	@GlobalInterceptor
+	public ResponseVO search(HttpServletRequest request, @NotEmpty String contactId){
+		TokenUserInfoDto tokenUserInfoDto=getTokenUserInfo(request);
+		UserContactSearchResultDto resultDto=userContactService.searchContact(tokenUserInfoDto.getUserId(),contactId);
+		return getSuccessResponseVO(resultDto);
+	}
 	@RequestMapping("/loadDataList")
 	public ResponseVO loadDataList(UserContactQuery query) {
 		return getSuccessResponseVO(userContactService.findListByPage(query));

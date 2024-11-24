@@ -10,7 +10,8 @@ public enum JoinTypeEnum {
     APPLY("申请",0),
         AUTHORIZE("授权",1),
             DENY("拒绝",2),
-                REJECT("驳回",3);
+                REJECT("驳回",3),
+    JOIN("加入",4);
     private String description;
     private Integer type;
     private JoinTypeEnum(String description,Integer type){

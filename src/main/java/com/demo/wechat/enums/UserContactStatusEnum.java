@@ -1,4 +1,4 @@
-package com.demo.wechat.service.impl;
+package com.demo.wechat.enums;
 
 /**
  * @Author ZXX
@@ -25,7 +25,14 @@ public enum UserContactStatusEnum {
                 ", desc='" + desc + '\'' +
                 '}';
     }
-
+    public static UserContactStatusEnum getByStatus(Integer status){
+        for(UserContactStatusEnum temp:UserContactStatusEnum.values()){
+            if(temp.getStatus().equals(status)){
+                return temp;
+            }
+        }
+        return null;
+    }
     public Integer getStatus() {
         return status;
     }
