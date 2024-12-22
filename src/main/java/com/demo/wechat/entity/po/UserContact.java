@@ -20,19 +20,16 @@ public class UserContact implements Serializable {
  	 * 用户ID
  	 */
 	private String userId;
-
 	/**
  	 * 联系人ID或者群组ID
  	 */
 	private String contactId;
-
 	/**
  	 * 联系人类型 0好友 1群组
  	 */
 	private Integer contactType;
 	private String contactName;
 	private Integer sex;
-
 	public Integer getSex() {
 		return sex;
 	}

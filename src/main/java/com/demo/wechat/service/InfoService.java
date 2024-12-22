@@ -1,13 +1,17 @@
 package com.demo.wechat.service;
 
 
+import java.io.IOException;
 import java.util.List;
 
+import cn.hutool.system.UserInfo;
 import com.demo.wechat.entity.dto.TokenUserInfoDto;
 import com.demo.wechat.entity.vo.PaginationResultVO;
 import com.demo.wechat.entity.po.Info;
 import com.demo.wechat.entity.query.InfoQuery;
 import com.demo.wechat.entity.vo.UserInfoVO;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @Description:  Service
@@ -85,4 +89,10 @@ public interface InfoService{
      * @return
      */
 	UserInfoVO login(String email, String password);
+//	void updateUserInfo(Info userInfo, MultipartFile avatarFile,MultipartFile avatarCover);
+
+	@Transactional(rollbackFor = Exception.class)
+	void updateUserInfo(Info userInfo, MultipartFile avatarFile, MultipartFile avatarCover) throws IOException;
+	void updateUserStatus(Integer status,String userId);
+	void forceOffLine(String userId);
 }

@@ -1,5 +1,8 @@
 package com.demo.wechat.mappers;
 
+import com.demo.wechat.entity.po.UserContactApply;
+import com.demo.wechat.entity.query.UserContactApplyQuery;
+import com.demo.wechat.entity.query.UserContactQuery;
 import org.apache.ibatis.annotations.Param;
 
 /**
@@ -20,7 +23,8 @@ public interface UserContactApplyMapper<T, P> extends BaseMapper {
 	/**
  	 * 根据 ApplyId 更新
  	 */
-	Integer updateByApplyId(@Param("bean") T t, @Param("applyId")Integer applyId); 
+	Integer updateByApplyId(@Param("bean") T t, @Param("applyId")Integer applyId);
+	Integer updateByParam(@Param("updateInfo") UserContactApply updateInfo,@Param("applyQuery") UserContactApplyQuery applyQuery);
 
 	/**
  	 * 根据 ApplyId 删除

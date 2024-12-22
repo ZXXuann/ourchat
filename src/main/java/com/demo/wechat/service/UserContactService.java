@@ -8,6 +8,8 @@ import com.demo.wechat.entity.dto.UserContactSearchResultDto;
 import com.demo.wechat.entity.vo.PaginationResultVO;
 import com.demo.wechat.entity.po.UserContact;
 import com.demo.wechat.entity.query.UserContactQuery;
+import com.demo.wechat.enums.UserContactStatusEnum;
+
 /**
  * @Description:  Service
  * @Author: false
@@ -61,5 +63,7 @@ public interface UserContactService{
 	Integer deleteUserContactByUserIdAndContactId(String userId, String contactId);
 	UserContactSearchResultDto searchContact(String userId, String contactId);
 	Integer applyAdd(TokenUserInfoDto tokenUserInfoDto,String contactId,String applyInfo);
+	void removeUserContact(String userId, String contactId, UserContactStatusEnum statusEnum);
 
+	void addContact(String applyUserId, String receiveUserId, String contactId, Integer contactType, String applyInfo);
 }

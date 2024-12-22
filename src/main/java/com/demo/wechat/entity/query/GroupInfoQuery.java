@@ -52,10 +52,27 @@ public class GroupInfoQuery extends BaseQuery {
 	/**
  	 * 状态1：正常 0：解散 查询对象
  	 */
-	private String status;
+	private Integer status;
 
 	private String statusFuzzy;
+	private Boolean queryGroupOwnerName;
+	private Boolean queryMemberCount;
 
+	public Boolean getQueryGroupOwnerName() {
+		return queryGroupOwnerName;
+	}
+
+	public void setQueryGroupOwnerName(Boolean queryGroupOwnerName) {
+		this.queryGroupOwnerName = queryGroupOwnerName;
+	}
+
+	public Boolean getQueryMemberCount() {
+		return queryMemberCount;
+	}
+
+	public void setQueryMemberCount(Boolean queryMemberCount) {
+		this.queryMemberCount = queryMemberCount;
+	}
 
 	public void setGroupId(String groupId) {
 		this.groupId = groupId;
@@ -105,11 +122,11 @@ public class GroupInfoQuery extends BaseQuery {
 		return joinType;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(Integer status) {
 		this.status = status;
 	}
 
-	public String getStatus() {
+	public Integer getStatus() {
 		return status;
 	}
 

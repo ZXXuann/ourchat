@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @Date: 2024/11/22 21:01:52
  */
 public interface GroupInfoService{
+	void dissolutionGroup(String groupOwnerId,String groupId);
 
 	/**
  	 * 根据条件查询列表

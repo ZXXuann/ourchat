@@ -30,12 +30,13 @@ public enum UserContactApplyStatusEnum {
         }
 
     }
-    public UserContactApplyStatusEnum getByStatus(Integer status){
+    public static UserContactApplyStatusEnum getByStatus(Integer status){
         for(UserContactApplyStatusEnum temp:UserContactApplyStatusEnum.values()){
             if(temp.getStatus().equals(status)){
                 return temp;
             }
         }
+        return null;
     }
     public Integer getStatus() {
         return status;

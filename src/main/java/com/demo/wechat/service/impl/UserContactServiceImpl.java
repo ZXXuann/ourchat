@@ -1,9 +1,11 @@
 package com.demo.wechat.service.impl;
 
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.system.UserInfo;
 import com.demo.wechat.entity.constants.Constants;
 import com.demo.wechat.entity.dto.TokenUserInfoDto;
@@ -18,6 +20,8 @@ import com.demo.wechat.mappers.GroupInfoMapper;
 import com.demo.wechat.mappers.InfoMapper;
 import com.demo.wechat.mappers.UserContactApplyMapper;
 import com.demo.wechat.mappers.UserContactMapper;
+import com.demo.wechat.redis.RedisComponent;
+import com.demo.wechat.service.UserContactApplyService;
 import com.demo.wechat.service.UserContactService;
 import com.demo.wechat.entity.vo.PaginationResultVO;
 import com.demo.wechat.entity.po.UserContact;
@@ -44,6 +48,10 @@ public class UserContactServiceImpl implements UserContactService{
 	private GroupInfoMapper groupInfoMapper;
 	@Resource
 	private UserContactApplyMapper userContactApplyMapper;
+	@Resource
+	private UserContactApplyService userContactApplyService;
+	@Resource
+	private RedisComponent redisComponent;
 	/**
  	 * 根据条件查询列表
  	 */
@@ -175,7 +183,11 @@ public class UserContactServiceImpl implements UserContactService{
 		String receiveUserId=contactId;
 		//查询对方好友（群组）是否已经添加，如果已经拉黑则无法添加
 		UserContact userContact=userContactMapper.selectByUserIdAndContactId(applyUserId,contactId);
-		if(userContact!=null&&UserContactStatusEnum.BLACKLIST_BE.getStatus().equals(userContact.getStatus())){
+//		UserContactStatusEnum.BLACKLIST_BE.getStatus().equals(userContact.getStatus())
+		if(userContact!=null&& ArrayUtil.contains(new Integer[]{
+				UserContactStatusEnum.BLACKLIST_BE.getStatus(),
+				UserContactStatusEnum.BLACKLIST.getStatus()
+		},userContact.getStatus())){
 			throw new BusinessException("对方已经拉黑你，无法添加");
 		}
 		//判断是否为申请群组
@@ -183,6 +195,7 @@ public class UserContactServiceImpl implements UserContactService{
 			//获取群组信息
 			GroupInfo groupInfo= (GroupInfo) groupInfoMapper.selectByGroupId(contactId);
 			//群组消息是否为空 并且 群组是否已解散
+//			GroupStatusEnum.DISSOLUTION.getStatus().equals(groupInfo.getStatus())
 			if(groupInfo==null|| GroupStatusEnum.DISSOLUTION.getStatus().equals(groupInfo.getStatus())){
 				throw new BusinessException("群聊不存在或已解散");
 			}
@@ -203,31 +216,31 @@ public class UserContactServiceImpl implements UserContactService{
 		}
 		//若是直接可以加入则添加好友
 		if(JoinTypeEnum.JOIN.getType().equals(joinType)){
-
-			//双向设定
-			//我方设定
-				UserContact userContact1=new UserContact();
-				//设置添加人
-				userContact1.setUserId(tokenUserInfoDto.getUserId());
-				//设置被添加人
-				userContact1.setContactId(contactId);
-				//设置创建的时间
-				userContact1.setCreateTime(nowTime);
-				//设置状态
-				userContact1.setStatus(UserContactStatusEnum.FRIEND.getStatus());
-				//设置更新时间
-				userContact1.setLastUpdateTime(nowTime);
-			//他放设定
-				UserContact userContact2=new UserContact();
-				userContact2.setUserId(contactId);
-				userContact2.setContactId(tokenUserInfoDto.getUserId());
-				userContact2.setCreateTime(nowTime);
-				userContact2.setStatus(UserContactStatusEnum.FRIEND.getStatus());
-				userContact2.setLastUpdateTime(nowTime);
-				//更新数据库
-				userContactMapper.insert(userContact2);
-				userContactMapper.insert(userContact1);
-			//	WS发送信息
+			this.addContact(applyUserId,receiveUserId,contactId,typeEnum.getType(),applyInfo);
+//			//双向设定
+//			//我方设定
+//				UserContact userContact1=new UserContact();
+//				//设置添加人
+//				userContact1.setUserId(tokenUserInfoDto.getUserId());
+//				//设置被添加人
+//				userContact1.setContactId(contactId);
+//				//设置创建的时间
+//				userContact1.setCreateTime(nowTime);
+//				//设置状态
+//				userContact1.setStatus(UserContactStatusEnum.FRIEND.getStatus());
+//				//设置更新时间
+//				userContact1.setLastUpdateTime(nowTime);
+//			//他放设定
+//				UserContact userContact2=new UserContact();
+//				userContact2.setUserId(contactId);
+//				userContact2.setContactId(tokenUserInfoDto.getUserId());
+//				userContact2.setCreateTime(nowTime);
+//				userContact2.setStatus(UserContactStatusEnum.FRIEND.getStatus());
+//				userContact2.setLastUpdateTime(nowTime);
+//				//更新数据库
+//				userContactMapper.insert(userContact2);
+//				userContactMapper.insert(userContact1);
+//			//	WS发送信息
 			//TODO 添加联系人
 			return joinType;
 		}
@@ -257,5 +270,75 @@ public class UserContactServiceImpl implements UserContactService{
 			//TODO 发送WS消息
 		}
 		return joinType;
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void removeUserContact(String userId, String contactId, UserContactStatusEnum statusEnum) {
+		//从自身的好友中移除好友
+		UserContact userContact=new UserContact();
+		userContact.setStatus(statusEnum.getStatus());
+		userContactMapper.updateByUserIdAndContactId(userContact,userId,contactId);
+		//从好友移除自身
+		UserContact friendContact=new UserContact();
+		if(UserContactStatusEnum.DEL==statusEnum){
+			friendContact.setStatus(UserContactStatusEnum.DEL_BE.getStatus());
+		} else if (UserContactStatusEnum.BLACKLIST==statusEnum) {
+			friendContact.setStatus(UserContactStatusEnum.BLACKLIST_BE.getStatus());
+		}
+		userContactMapper.updateByUserIdAndContactId(friendContact,contactId,userId);
+		//TODO 从我的好友列表缓存中删除好友
+		//TODO 从好友列表缓存中删除自身
+
+	}
+	/**
+	 * 添加好友
+	 * @param applyUserId 申请人
+	 * @param receiveUserId 接收申请的人
+	 * @param contactId 群的ID或者接收申请人的ID
+	 * @param contactType 当前这一条申请的类型 群还是人？
+	 * @param applyInfo 申请的消息
+	 */
+	@Override
+	public void addContact(String applyUserId, String receiveUserId, String contactId, Integer contactType, String applyInfo) {
+		//获取群聊人数(若是群聊）
+		if(UserContactTypeEnum.GROUP.getType().equals(contactType)){
+			UserContactQuery userContactQuery=new UserContactQuery();
+			//接收申请人的ID，也就是在谁的列表
+			userContactQuery.setContactId(contactId);
+			//状态调为好友状态
+			userContactQuery.setStatus(UserContactStatusEnum.FRIEND.getStatus());
+			//查询人数
+			Integer count=userContactMapper.selectCount(userContactQuery);
+			if(count>=redisComponent.getSysSetting().getMaxGroupMemberCount()){
+				throw new BusinessException("成员已满，无法加入");
+			}
+		}
+		Date curDate=new Date();
+		List<UserContact> contactList=new ArrayList<>();
+		//申请人添加对方
+		UserContact userContact=new UserContact();
+		userContact.setUserId(applyUserId);
+		userContact.setContactId(contactId);
+		userContact.setContactType(contactType);
+		userContact.setCreateTime(curDate);
+		userContact.setLastUpdateTime(curDate);
+		userContact.setStatus(UserContactStatusEnum.FRIEND.getStatus());
+		contactList.add(userContact);
+		//如果是申请好友，接受人添加申请人，群组不用添加对方为好友
+		if(UserContactTypeEnum.USER.getType().equals(contactType)){
+			userContact=new UserContact();
+			userContact.setUserId(receiveUserId);
+			userContact.setContactId(applyUserId);
+			userContact.setContactType(contactType);
+			userContact.setCreateTime(curDate);
+			userContact.setLastUpdateTime(curDate);
+			userContact.setStatus(UserContactStatusEnum.FRIEND.getStatus());
+			contactList.add(userContact);
+		}
+		userContactMapper.insertOrUpdateBatch(contactList);
+		//TODO 如果是好友，接收人也添加申请人为好友 添加缓存
+
+		//TODO 创建会话 发送消息
 	}
 }

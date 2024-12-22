@@ -31,6 +31,15 @@ public class GroupInfo implements Serializable {
  	 */
 	private String groupOwnerId;
 	private Integer memberCount;
+	private String groupOwnerNickName;
+
+	public String getGroupOwnerNickName() {
+		return groupOwnerNickName;
+	}
+
+	public void setGroupOwnerNickName(String groupOwnerNickName) {
+		this.groupOwnerNickName = groupOwnerNickName;
+	}
 
 	public Integer getMemberCount() {
 		return memberCount;
@@ -61,7 +70,7 @@ public class GroupInfo implements Serializable {
  	 * 状态1：正常 0：解散
  	 */
 	@JsonIgnore
-	private String status;
+	private Integer status;
 
 
 	public void setGroupId(String groupId) {
@@ -112,11 +121,11 @@ public class GroupInfo implements Serializable {
 		return joinType;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(Integer status) {
 		this.status = status;
 	}
 
-	public String getStatus() {
+	public Integer getStatus() {
 		return status;
 	}
 	@Override

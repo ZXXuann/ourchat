@@ -31,6 +31,14 @@ public enum UserContactTypeEnum {
     public String getDesc() {
         return desc;
     }
+    public static UserContactTypeEnum getByStatus(Integer status){
+        for(UserContactTypeEnum temp:UserContactTypeEnum.values()){
+            if(temp.getType().equals(status)){
+                return temp;
+            }
+        }
+        return null;
+    }
     public static UserContactTypeEnum getByName(String name){
 
         try{

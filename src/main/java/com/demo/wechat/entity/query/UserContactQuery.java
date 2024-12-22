@@ -1,5 +1,7 @@
 package com.demo.wechat.entity.query;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import java.util.Date;
 
 
@@ -27,7 +29,6 @@ public class UserContactQuery extends BaseQuery {
  	 * 联系人类型 0好友 1群组 查询对象
  	 */
 	private Integer contactType;
-
 	/**
  	 * 创建时间 查询对象
  	 */
@@ -36,6 +37,42 @@ public class UserContactQuery extends BaseQuery {
 	private String createTimeStart;
 	private String createTimeEnd;
 	private Boolean queryUserInfo;
+	private Boolean queryGroupInfo;
+	private Boolean queryContactUserInfo;
+	private Boolean excludeMyGroup;
+	private Integer[] statusArray;
+
+	public Integer[] getStatusArray() {
+		return statusArray;
+	}
+
+	public void setStatusArray(Integer[] statusArray) {
+		this.statusArray = statusArray;
+	}
+
+	public Boolean getExcludeMyGroup() {
+		return excludeMyGroup;
+	}
+
+	public void setExcludeMyGroup(Boolean excludeMyGroup) {
+		this.excludeMyGroup = excludeMyGroup;
+	}
+
+	public Boolean getQueryGroupInfo() {
+		return queryGroupInfo;
+	}
+
+	public void setQueryGroupInfo(Boolean queryGroupInfo) {
+		this.queryGroupInfo = queryGroupInfo;
+	}
+
+	public Boolean getQueryContactUserInfo() {
+		return queryContactUserInfo;
+	}
+
+	public void setQueryContactUserInfo(Boolean queryContactUserInfo) {
+		this.queryContactUserInfo = queryContactUserInfo;
+	}
 
 	public Boolean getQueryUserInfo() {
 		return queryUserInfo;

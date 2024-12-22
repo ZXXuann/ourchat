@@ -10,10 +10,8 @@ import com.demo.wechat.entity.constants.Constants;
 import com.demo.wechat.entity.dto.SysSettingDto;
 import com.demo.wechat.entity.po.UserContact;
 import com.demo.wechat.entity.query.SimplePage;
-import com.demo.wechat.enums.PageSize;
-import com.demo.wechat.enums.ResponseCodeEnum;
-import com.demo.wechat.enums.UserContactStatusEnum;
-import com.demo.wechat.enums.UserContactTypeEnum;
+import com.demo.wechat.entity.query.UserContactQuery;
+import com.demo.wechat.enums.*;
 import com.demo.wechat.exception.BusinessException;
 import com.demo.wechat.mappers.GroupInfoMapper;
 import com.demo.wechat.mappers.UserContactMapper;
@@ -24,6 +22,7 @@ import com.demo.wechat.entity.po.GroupInfo;
 import com.demo.wechat.entity.query.GroupInfoQuery;
 import com.demo.wechat.utils.StringTools;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -43,6 +42,29 @@ public class GroupInfoServiceImpl implements GroupInfoService{
 	private UserContactMapper userContactMapper;
 	@Resource
 	private AppConfig appConfig;
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void dissolutionGroup(String groupOwnerId, String groupId) {
+		GroupInfo dbInfo=this.groupInfoMapper.selectByGroupId(groupId);
+		//判断传入的群主信息id是否一致
+		if(null==dbInfo||!dbInfo.getGroupOwnerId().equals(groupOwnerId)){
+			throw new BusinessException(ResponseCodeEnum.CODE_600);
+		}
+		//删除群组
+		GroupInfo updateInfo=new GroupInfo();
+		updateInfo.setStatus(GroupStatusEnum.DISSOLUTION.getStatus());
+		this.groupInfoMapper.updateByGroupId(updateInfo,groupId);
+		//删除联系人的信息
+		UserContactQuery userContactQuery=new UserContactQuery();
+		userContactQuery.setContactId(groupId);
+		userContactQuery.setContactType(UserContactTypeEnum.GROUP.getType());
+		UserContact updatedUserContact=new UserContact();
+		updatedUserContact.setStatus(UserContactStatusEnum.DEL.getStatus());
+		this.userContactMapper.updateByParam(updatedUserContact,userContactQuery);
+		//TODO 移除群员
+		//TODO 发消息 1.更新回话信息 2.记录群信息 3.发送解散通知信息
+	}
 
 	/**
  	 * 根据条件查询列表

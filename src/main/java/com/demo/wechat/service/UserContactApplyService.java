@@ -56,4 +56,6 @@ public interface UserContactApplyService{
  	 * 根据 ApplyId 删除
  	 */
 	Integer deleteUserContactApplyByApplyId(Integer applyId);
+	void dealWithApply(String userId,Integer applyId,Integer status);
+
 }

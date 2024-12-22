@@ -20,4 +20,7 @@ public class Constants {
     public static final String FILE_FOLDER_FILE="/file";
     public static final String FILE_FOLDER_AVATAR_NAME="/avatar";
     public static final String APPLY_INFO_TEMPLATE="您好";
+    public static final String IMAGE_SUFFIX="/head_image";
+    public static final String COVER_IMAGE_SUFFIX="/cover_image";
+    public static final String REGEX_PASSWORD="^(?=.*\\d)(?=.*[a-zA-Z])[\\da-zA-Z~!@#$$^&*_]{8,18}$";
 }

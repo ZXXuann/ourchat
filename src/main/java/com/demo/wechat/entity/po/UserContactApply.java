@@ -2,6 +2,7 @@ package com.demo.wechat.entity.po;
 
 import java.io.Serializable;
 
+import com.demo.wechat.enums.UserContactApplyStatusEnum;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
@@ -47,12 +48,33 @@ public class UserContactApply implements Serializable {
  	 */
 	@JsonIgnore
 	private Integer status;
+	private String statusName;
+
+	public String getStatusName() {
+		UserContactApplyStatusEnum statusEnum=UserContactApplyStatusEnum.getByStatus(status);
+		return statusEnum==null?null:statusEnum.getDesc();
+	}
+
+	public void setStatusName(String statusName) {
+		this.statusName = statusName;
+	}
 
 	/**
  	 * 申请信息
  	 */
 	private String applyInfo;
+	/**
+	 * 群名或者人名
+	 */
+	private String contactName;
 
+	public String getContactName() {
+		return contactName;
+	}
+
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
+	}
 
 	public void setApplyId(Integer applyId) {
 		this.applyId = applyId;

@@ -1,11 +1,13 @@
 package com.demo.wechat.service.impl;
 
 
-import java.beans.Transient;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.system.UserInfo;
+import com.demo.wechat.annotation.GlobalInterceptor;
 import com.demo.wechat.entity.config.AppConfig;
 import com.demo.wechat.entity.constants.Constants;
 import com.demo.wechat.entity.dto.TokenUserInfoDto;
@@ -13,10 +15,7 @@ import com.demo.wechat.entity.po.InfoBeauty;
 import com.demo.wechat.entity.query.InfoBeautyQuery;
 import com.demo.wechat.entity.query.SimplePage;
 import com.demo.wechat.entity.vo.UserInfoVO;
-import com.demo.wechat.enums.JoinTypeEnum;
-import com.demo.wechat.enums.PageSize;
-import com.demo.wechat.enums.SexEnum;
-import com.demo.wechat.enums.UserStatusEnum;
+import com.demo.wechat.enums.*;
 import com.demo.wechat.exception.BusinessException;
 import com.demo.wechat.mappers.InfoBeautyMapper;
 import com.demo.wechat.mappers.InfoMapper;
@@ -30,6 +29,7 @@ import com.demo.wechat.utils.StringTools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @Description:  业务接口实现
@@ -213,6 +213,50 @@ public class InfoServiceImpl implements InfoService{
 //		userInfoVO.setAdmin(tokenUserInfoDto.getAdmin());
 //		return getTokenUserInfoDto(info);
 	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	@GlobalInterceptor
+	public void updateUserInfo(Info userInfo, MultipartFile avatarFile, MultipartFile avatarCover) throws IOException {
+		if(avatarFile!=null&&avatarCover!=null){
+			String baseFolder=appConfig.getProjectFolder()+Constants.FILE_FOLDER_FILE;
+			File targetFileFolder=new File(baseFolder+Constants.FILE_FOLDER_AVATAR_NAME);
+			if(!targetFileFolder.exists()){
+				targetFileFolder.mkdirs();
+			}
+			String filePath=targetFileFolder.getPath()+"/"+userInfo.getUserId()+Constants.IMAGE_SUFFIX;
+			//存储图像
+			avatarFile.transferTo(new File(filePath));
+			//存储缩略图
+			avatarCover.transferTo(new File(filePath+Constants.COVER_IMAGE_SUFFIX));
+		}
+		//
+		Info dbInfo=this.infoMapper.selectByUserId(userInfo.getUserId());
+		this.infoMapper.updateByUserId(userInfo, userInfo.getUserId());
+		String contactNameUpdate=null;
+		if(dbInfo.getNickName().equals(userInfo.getNickName())){
+			contactNameUpdate=userInfo.getNickName();
+		}
+		//TODO 更新会话信息中的昵称消息
+
+	}
+
+	@Override
+	public void updateUserStatus(Integer status, String userId) {
+		UserStatusEnum userStatusEnum=UserStatusEnum.getByStatus(status);
+		if(userStatusEnum==null){
+			throw new BusinessException(ResponseCodeEnum.CODE_600);
+		}
+		Info userInfo=new Info();
+		userInfo.setStatus(userStatusEnum.getStatus());
+		this.infoMapper.updateByUserId(userInfo,userId);
+	}
+
+	@Override
+	public void forceOffLine(String userId) {
+		//TODO 强制下线
+	}
+
 	private TokenUserInfoDto getTokenUserInfoDto(Info info){
 		TokenUserInfoDto tokenUserInfoDto=new TokenUserInfoDto();
 		tokenUserInfoDto.setUserId(info.getUserId());
@@ -230,4 +274,5 @@ public class InfoServiceImpl implements InfoService{
 			System.out.println(StringTools.getUserId());
 		}
 	}
+
 }
