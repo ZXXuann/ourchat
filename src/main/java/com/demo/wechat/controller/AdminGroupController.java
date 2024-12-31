@@ -49,6 +49,8 @@ public class AdminGroupController extends ABaseController{
 		PaginationResultVO resultVO=groupInfoService.findListByPage(query);
 		return getSuccessResponseVO(resultVO);
 	}
+	@RequestMapping("/dissolutionGroup")
+	@GlobalInterceptor(checkAdmin = true)
 	public ResponseVO dissolutionGroup(@NotEmpty String groupId){
 		GroupInfo groupInfo=groupInfoService.getGroupInfoByGroupId(groupId);
 		if(null==groupInfo){

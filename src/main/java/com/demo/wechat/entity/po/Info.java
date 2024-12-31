@@ -1,7 +1,9 @@
 package com.demo.wechat.entity.po;
 
+import java.io.Console;
 import java.io.Serializable;
 
+import com.demo.wechat.entity.constants.Constants;
 import com.demo.wechat.enums.DateTimePatternEnum;
 import com.demo.wechat.utils.DateUtils;
 import java.util.Date;
@@ -88,6 +90,19 @@ public class Info implements Serializable {
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date lastOffTime;
 
+	private Integer onlineType;
+
+	public Integer getOnlineType() {
+		if(lastLoginTime!=null&&lastLoginTime.getTime()>lastOffTime.getTime()){
+			return Constants.ONE;
+		}else{
+			return Constants.ZERO;
+		}
+	}
+
+	public void setOnlineType(Integer onLineType) {
+		this.onlineType = onLineType;
+	}
 
 	public void setUserId(String userId) {
 		this.userId = userId;

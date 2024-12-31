@@ -2,6 +2,8 @@ package com.demo.wechat.service;
 
 
 import java.util.List;
+
+import com.demo.wechat.entity.dto.TokenUserInfoDto;
 import com.demo.wechat.entity.vo.PaginationResultVO;
 import com.demo.wechat.entity.po.UserContactApply;
 import com.demo.wechat.entity.query.UserContactApplyQuery;
@@ -57,5 +59,5 @@ public interface UserContactApplyService{
  	 */
 	Integer deleteUserContactApplyByApplyId(Integer applyId);
 	void dealWithApply(String userId,Integer applyId,Integer status);
-
+	Integer applyAdd(TokenUserInfoDto tokenUserInfoDto,String contactId,String applyInfo);
 }

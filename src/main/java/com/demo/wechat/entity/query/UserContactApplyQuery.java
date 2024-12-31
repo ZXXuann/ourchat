@@ -61,6 +61,15 @@ public class UserContactApplyQuery extends BaseQuery {
 	 *
 	 */
 	private Boolean queryContactInfo;
+	private Long lastApplyTimestamp;
+
+	public Long getLastApplyTimestamp() {
+		return lastApplyTimestamp;
+	}
+
+	public void setLastApplyTimestamp(Long lastApplyTimestamp) {
+		this.lastApplyTimestamp = lastApplyTimestamp;
+	}
 
 	public Boolean getQueryContactInfo() {
 		return queryContactInfo;

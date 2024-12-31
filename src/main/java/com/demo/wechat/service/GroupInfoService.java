@@ -1,10 +1,14 @@
 package com.demo.wechat.service;
 
 
+import java.lang.reflect.Member;
 import java.util.List;
+
+import com.demo.wechat.entity.dto.TokenUserInfoDto;
 import com.demo.wechat.entity.vo.PaginationResultVO;
 import com.demo.wechat.entity.po.GroupInfo;
 import com.demo.wechat.entity.query.GroupInfoQuery;
+import com.demo.wechat.enums.MessageTypeEnum;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -61,4 +65,7 @@ public interface GroupInfoService{
 	Integer deleteGroupInfoByGroupId(String groupId);
 
 	void saveGroup(GroupInfo groupInfo, MultipartFile avatarFile,MultipartFile avatarCover);
+	void addOrRemoveGroupUser(TokenUserInfoDto tokenUserInfoDto,String groupId,String selectContacts,Integer opType);
+
+	void leaveGroup(String contactId, String groupId, MessageTypeEnum messageTypeEnum);
 }

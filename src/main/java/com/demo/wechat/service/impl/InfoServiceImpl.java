@@ -4,28 +4,36 @@ package com.demo.wechat.service.impl;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.system.UserInfo;
 import com.demo.wechat.annotation.GlobalInterceptor;
 import com.demo.wechat.entity.config.AppConfig;
 import com.demo.wechat.entity.constants.Constants;
+import com.demo.wechat.entity.dto.MessageSendDto;
 import com.demo.wechat.entity.dto.TokenUserInfoDto;
 import com.demo.wechat.entity.po.InfoBeauty;
+import com.demo.wechat.entity.po.UserContact;
 import com.demo.wechat.entity.query.InfoBeautyQuery;
 import com.demo.wechat.entity.query.SimplePage;
+import com.demo.wechat.entity.query.UserContactQuery;
 import com.demo.wechat.entity.vo.UserInfoVO;
 import com.demo.wechat.enums.*;
 import com.demo.wechat.exception.BusinessException;
 import com.demo.wechat.mappers.InfoBeautyMapper;
 import com.demo.wechat.mappers.InfoMapper;
+import com.demo.wechat.mappers.UserContactMapper;
 import com.demo.wechat.redis.RedisComponent;
+import com.demo.wechat.service.ChatSessionUserService;
 import com.demo.wechat.service.InfoService;
 import com.demo.wechat.entity.vo.PaginationResultVO;
 import com.demo.wechat.entity.po.Info;
 import com.demo.wechat.entity.query.InfoQuery;
+import com.demo.wechat.service.UserContactService;
 import com.demo.wechat.utils.CopyTools;
 import com.demo.wechat.utils.StringTools;
+import com.demo.wechat.websocket.MessageHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +54,14 @@ public class InfoServiceImpl implements InfoService{
 	private InfoBeautyMapper<InfoBeauty, InfoBeautyQuery> infoBeautyMapper;
 	@Autowired
 	private RedisComponent redisComponent;
+	@Autowired
+	private UserContactMapper userContactMapper;
+	@Autowired
+	private UserContactService userContactService;
+	@Autowired
+	private ChatSessionUserService chatSessionUserService;
+	@Autowired
+	private MessageHandler messageHandler;
 	/**
  	 * 根据条件查询列表
  	 */
@@ -173,6 +189,7 @@ public class InfoServiceImpl implements InfoService{
 		info.setLastLoginTime(currentDate);
 		this.add(info);
 		//----------------------------------
+		userContactService.addContact4Robot(userId);
 	}
 	public UserInfoVO login(String email, String password){
 		//根据email获取用户信息
@@ -187,6 +204,17 @@ public class InfoServiceImpl implements InfoService{
 		if(UserStatusEnum.DISABLE.equals(info.getStatus())){
 			throw new BusinessException("账号已被封禁");
 		}
+		//查询联系人
+		UserContactQuery contactQuery=new UserContactQuery();
+		contactQuery.setUserId(info.getUserId());
+		contactQuery.setStatus(UserContactStatusEnum.FRIEND.getStatus());
+		List<UserContact> contactList=userContactMapper.selectList(contactQuery);
+		List<String> contactIdList=contactList.stream().map(item->item.getContactId()).collect(Collectors.toList());
+		//往redis中存放联系人列表
+		redisComponent.cleanUserContact(info.getUserId());
+		if(!contactList.isEmpty())
+			redisComponent.addUserContactBatch(info.getUserId(), contactIdList);
+
 		//将info转换为TOKENUSEERINFODTO
 		TokenUserInfoDto tokenUserInfoDto=getTokenUserInfoDto(info);
 		//心跳
@@ -234,11 +262,19 @@ public class InfoServiceImpl implements InfoService{
 		Info dbInfo=this.infoMapper.selectByUserId(userInfo.getUserId());
 		this.infoMapper.updateByUserId(userInfo, userInfo.getUserId());
 		String contactNameUpdate=null;
-		if(dbInfo.getNickName().equals(userInfo.getNickName())){
+		if(!dbInfo.getNickName().equals(userInfo.getNickName())){
 			contactNameUpdate=userInfo.getNickName();
 		}
-		//TODO 更新会话信息中的昵称消息
+		//更新会话信息中的昵称消息
+		if(contactNameUpdate==null){
+			return;
+		}
+		//更新token中的昵称
+		TokenUserInfoDto tokenUserInfoDto=redisComponent.getTokenUserInfoDtoByUserId(userInfo.getUserId());
+		tokenUserInfoDto.setNickName(contactNameUpdate);
+		redisComponent.saveTokenUserInfoDto(tokenUserInfoDto);
 
+		chatSessionUserService.updateRedundancyInfo(contactNameUpdate,userInfo.getUserId());
 	}
 
 	@Override
@@ -254,7 +290,11 @@ public class InfoServiceImpl implements InfoService{
 
 	@Override
 	public void forceOffLine(String userId) {
-		//TODO 强制下线
+		MessageSendDto sendDto=new MessageSendDto();
+		sendDto.setContactType(UserContactTypeEnum.USER.getType());
+		sendDto.setMessageType(MessageTypeEnum.FORCE_OFF_LINE.getType());
+		sendDto.setContactId(userId);
+		messageHandler.sendMessage(sendDto);
 	}
 
 	private TokenUserInfoDto getTokenUserInfoDto(Info info){

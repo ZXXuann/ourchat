@@ -9,6 +9,7 @@ import com.demo.wechat.entity.po.UserContact;
 import com.demo.wechat.entity.query.UserContactQuery;
 import com.demo.wechat.entity.vo.GroupInfoVo;
 import com.demo.wechat.enums.GroupStatusEnum;
+import com.demo.wechat.enums.MessageTypeEnum;
 import com.demo.wechat.exception.BusinessException;
 import com.demo.wechat.service.GroupInfoService;
 import com.demo.wechat.entity.vo.ResponseVO;
@@ -16,6 +17,7 @@ import com.demo.wechat.entity.po.GroupInfo;
 import com.demo.wechat.entity.query.GroupInfoQuery;
 import com.demo.wechat.service.UserContactService;
 import com.demo.wechat.enums.UserContactStatusEnum;
+import org.apache.el.parser.Token;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -121,7 +123,24 @@ public class GroupInfoController extends ABaseController{
 		this.groupInfoService.saveGroup(groupInfo,avatarFile,avatarCover);
 		return getSuccessResponseVO(null);
 	}
-
+	@RequestMapping("/addOrRemoveGroupUser")
+	@GlobalInterceptor
+	public ResponseVO addOrRemoveGroupUser(HttpServletRequest request,
+										   @NotEmpty String groupId,
+										   @NotEmpty String selectContacts,
+										   @NotNull Integer opType){
+		TokenUserInfoDto tokenUserInfoDto=getTokenUserInfo(request);
+		groupInfoService.addOrRemoveGroupUser(tokenUserInfoDto,groupId,selectContacts,opType);
+		return getSuccessResponseVO(null);
+	}
+	@RequestMapping("/leaveGroup")
+	@GlobalInterceptor
+	public ResponseVO leaveGroup(HttpServletRequest request,
+								 @NotEmpty String groupId){
+		TokenUserInfoDto tokenUserInfoDto=getTokenUserInfo(request);
+		groupInfoService.leaveGroup(tokenUserInfoDto.getUserId(),groupId, MessageTypeEnum.LEAVE_GROUP);
+		return getSuccessResponseVO(null);
+	}
 	@RequestMapping("/loadDataList")
 	public ResponseVO loadDataList(GroupInfoQuery query) {
 		return getSuccessResponseVO(groupInfoService.findListByPage(query));
@@ -178,4 +197,12 @@ public class GroupInfoController extends ABaseController{
 		this.groupInfoService.deleteGroupInfoByGroupId(groupId);
 		return getSuccessResponseVO(null);
 }
+	@RequestMapping("/dissolutionGroup")
+	@GlobalInterceptor
+	public ResponseVO dissolutionGroup(HttpServletRequest request,
+									   @NotEmpty String groupId){
+		TokenUserInfoDto tokenUserInfoDto=getTokenUserInfo(request);
+		groupInfoService.dissolutionGroup(tokenUserInfoDto.getUserId(),groupId);
+		return getSuccessResponseVO(null);
+	}
 }

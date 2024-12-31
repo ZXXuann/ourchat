@@ -62,8 +62,9 @@ public interface UserContactService{
  	 */
 	Integer deleteUserContactByUserIdAndContactId(String userId, String contactId);
 	UserContactSearchResultDto searchContact(String userId, String contactId);
-	Integer applyAdd(TokenUserInfoDto tokenUserInfoDto,String contactId,String applyInfo);
+//	Integer applyAdd(TokenUserInfoDto tokenUserInfoDto,String contactId,String applyInfo);
 	void removeUserContact(String userId, String contactId, UserContactStatusEnum statusEnum);
 
 	void addContact(String applyUserId, String receiveUserId, String contactId, Integer contactType, String applyInfo);
+	void addContact4Robot(String userId);
 }

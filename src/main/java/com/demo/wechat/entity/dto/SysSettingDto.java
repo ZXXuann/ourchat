@@ -20,11 +20,19 @@ public class SysSettingDto implements Serializable {
     //文件大小
     private Integer maxFileSize=5;
     //机器人ID
-//    private String robotUid= Constants.ROBOT_UID;
+    private String robotUid= Constants.ROBOT_UID;
     //机器人昵称
     private String robotNickName="LittleWe";
     //欢迎语
     private String robotWelcome="欢迎使用WeChat";
+
+    public String getRobotUid() {
+        return robotUid;
+    }
+
+    public void setRobotUid(String robotUid) {
+        this.robotUid = robotUid;
+    }
 
     public Integer getMaxGroupCount() {
         return maxGroupCount;

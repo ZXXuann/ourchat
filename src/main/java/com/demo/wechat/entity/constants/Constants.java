@@ -23,4 +23,13 @@ public class Constants {
     public static final String IMAGE_SUFFIX="/head_image";
     public static final String COVER_IMAGE_SUFFIX="/cover_image";
     public static final String REGEX_PASSWORD="^(?=.*\\d)(?=.*[a-zA-Z])[\\da-zA-Z~!@#$$^&*_]{8,18}$";
+    public static final Integer REDIS_KEY_EXPIRES_HEART_BEAT=6;
+    //用户联系人列表
+    public static final String REDIS_KEY_USER_CONTACT="wechat:ws:user:contact";
+    public static final Long MILLISSECONDS_3DAYS_AGO=3*24*60*60*1000L;
+    public static final String[] IMAGE_SUFFIX_LIST=new String[]{".jpeg",".jpg",".png",".gif",".bmp",".webp"};
+    public static final String[] VIDEO_SUFFIX_LIST=new String[]{".mp4",".avi",".rmvb",".mkv",".mov"};
+    public static final Long FILE_SIZE_MB=1024*1024L;
+    public static final Integer ZERO=0;
+    public static final Integer ONE=1;
 }

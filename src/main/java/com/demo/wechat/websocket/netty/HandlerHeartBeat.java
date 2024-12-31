@@ -1,9 +1,12 @@
 package com.demo.wechat.websocket.netty;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -12,21 +15,28 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class HandlerHeartBeat extends ChannelDuplexHandler {
-    //userEventTriggered方法是Netty中处理用户自定义事件的方法。
+    //userEventTriggered方法是Netty中处理用户自定义事件的方法。这玩意并不是每个ChannelHandler都必须实现的。
+    // 它的作用是处理特殊的、由用户触发的事件，这些事件通常不是I/O事件，而是应用测层自定义的事件，或者是通过IdleStateHandler这样的处理器生成的事件
+
     //IdleStateEvent是用来通知连接在一定时间内没有读写操作的事件，通常用于心跳检测或者空闲超时检测
     //其具有如下三种状态：
     //READER_IDLE:读取空闲状态，表示在一定时间内没有接收到任何数据
     //WRITER_IDLE:写空闲状态，表示在一定时间内没有发送任何数据
     //ALL_IDLE:所有空闲状态，表示在一定时间内没有进行任何读取和写入操作
+    //ChannelDuplexHandler是一个双向处理器，duplex双工。它同时具备入站和出站事件的处理能力
+
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if(evt instanceof IdleStateEvent){
             IdleStateEvent e=(IdleStateEvent) evt;
             if(e.state()==IdleState.READER_IDLE){
-                log.info("心跳超时");
+                Channel channel=ctx.channel();
+                Attribute<String> attribute=channel.attr(AttributeKey.valueOf(channel.id().toString()));
+                String userId=attribute.get();
+                log.info("用户{}心跳超时",userId);
                 ctx.close();
             }else if(e.state()==IdleState.WRITER_IDLE){
-                //如果链接在一段时间没有发送数据给客户端，那么向
+                //如果链接在一段时间没有发送数据给客户端，那么向客户端发送一个简单的心跳数据
                 ctx.writeAndFlush("heart");
             }
         }

@@ -9,6 +9,7 @@ import cn.hutool.system.UserInfo;
 import com.demo.wechat.annotation.GlobalInterceptor;
 import com.demo.wechat.entity.constants.Constants;
 import com.demo.wechat.entity.dto.TokenUserInfoDto;
+import com.demo.wechat.entity.query.ChatMessageQuery;
 import com.demo.wechat.entity.vo.UserInfoVO;
 import com.demo.wechat.service.InfoService;
 import com.demo.wechat.entity.vo.ResponseVO;
@@ -16,6 +17,7 @@ import com.demo.wechat.entity.po.Info;
 import com.demo.wechat.entity.query.InfoQuery;
 import com.demo.wechat.utils.CopyTools;
 import com.demo.wechat.utils.StringTools;
+import com.demo.wechat.websocket.ChannelContextUtils;
 import org.apache.el.parser.Token;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,11 +40,13 @@ public class InfoController extends ABaseController{
 
 	@Resource
 	private InfoService infoService;
+	@Resource
+	private ChannelContextUtils channelContextUtils;
 	@RequestMapping("/logout")
 	@GlobalInterceptor
 	public ResponseVO logout(HttpServletRequest request){
 		TokenUserInfoDto tokenUserInfoDto=getTokenUserInfo(request);
-		//TODO 退出登录 关闭WS连接
+		channelContextUtils.closeContact(tokenUserInfoDto.getUserId());
 		return getSuccessResponseVO(null);
 	}
 	@RequestMapping("/updatePassword")
@@ -53,7 +57,7 @@ public class InfoController extends ABaseController{
 		Info userInfo=new Info();
 		userInfo.setPassword(StringTools.encodeMd5(password));
 		this.infoService.updateInfoByUserId(userInfo,tokenUserInfoDto.getUserId());
-		//TODO 强制退出，重新登录
+		channelContextUtils.closeContact(tokenUserInfoDto.getUserId());
 		return getSuccessResponseVO(null);
 	}
 	@RequestMapping("/saveUserInfo")
