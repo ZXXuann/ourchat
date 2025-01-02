@@ -6,7 +6,7 @@ package com.demo.wechat.entity.vo;
  */
 public class UserInfoVO {
     private String userId;
-    private String nickname;
+    private String nickName;
     private Integer sex;
     private Integer joinType;
     private String personalSignature;
@@ -16,11 +16,27 @@ public class UserInfoVO {
     private Boolean admin;
     private Integer contactStatus;
 
+    public UserInfoVO() {
+    }
+
+    public UserInfoVO(String userId, String nickName, Integer sex, Integer joinType, String personalSignature, String areaCode, String areaName, String token, Boolean admin, Integer contactStatus) {
+        this.userId = userId;
+        this.nickName = nickName;
+        this.sex = sex;
+        this.joinType = joinType;
+        this.personalSignature = personalSignature;
+        this.areaCode = areaCode;
+        this.areaName = areaName;
+        this.token = token;
+        this.admin = admin;
+        this.contactStatus = contactStatus;
+    }
+
     @Override
     public String toString() {
         return "UserInfoVO{" +
                 "userId='" + userId + '\'' +
-                ", nickname='" + nickname + '\'' +
+                ", nickName='" + nickName + '\'' +
                 ", sex=" + sex +
                 ", joinType=" + joinType +
                 ", personalSignature='" + personalSignature + '\'' +
@@ -40,12 +56,12 @@ public class UserInfoVO {
         this.userId = userId;
     }
 
-    public String getNickname() {
-        return nickname;
+    public String getNickName() {
+        return nickName;
     }
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 
     public Integer getSex() {

@@ -32,4 +32,5 @@ public class Constants {
     public static final Long FILE_SIZE_MB=1024*1024L;
     public static final Integer ZERO=0;
     public static final Integer ONE=1;
+    public static final String SYSSETTING_EXCEPTION_MSG="系统设置传参失败，请查证后再提交";
 }

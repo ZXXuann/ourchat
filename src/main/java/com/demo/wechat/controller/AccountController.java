@@ -1,6 +1,7 @@
 package com.demo.wechat.controller;
 
 import com.demo.wechat.annotation.GlobalInterceptor;
+import com.demo.wechat.entity.config.AppConfig;
 import com.demo.wechat.entity.constants.Constants;
 import com.demo.wechat.entity.dto.SysSettingDto;
 import com.demo.wechat.entity.dto.TokenUserInfoDto;
@@ -45,7 +46,8 @@ public class AccountController extends ABaseController{
     private InfoService infoService;
     @Autowired
     private RedisComponent redisComponent;
-
+    @Autowired
+    private AppConfig appConfig;
     /**
      * 获取验证码
      *  生成验证码-》base64
@@ -89,12 +91,16 @@ public class AccountController extends ABaseController{
                                @NotEmpty String nickname,
                                @NotEmpty String checkCode){
         try{
-            if(!checkCode.equalsIgnoreCase((String) redisUtils.get(Constants.REDIS_KEY_CHECK_CODE+checkCodeKey))){
-                throw new BusinessException("图片验证码不正确");
+            if(appConfig.getRunCheckCode()){
+                if(!checkCode.equalsIgnoreCase((String) redisUtils.get(Constants.REDIS_KEY_CHECK_CODE+checkCodeKey))){
+                    throw new BusinessException("图片验证码不正确");
+                }
             }
             infoService.register(email,nickname,password);
         }finally {
-            redisUtils.delete(Constants.REDIS_KEY_CHECK_CODE+checkCodeKey);
+            if(appConfig.getRunCheckCode()) {
+                redisUtils.delete(Constants.REDIS_KEY_CHECK_CODE + checkCodeKey);
+            }
         }
         return getSuccessResponseVO(null);
     }
@@ -113,13 +119,18 @@ public class AccountController extends ABaseController{
                             @NotEmpty String password,
                             @NotEmpty String checkCode){
         try{
-            if(!checkCode.equalsIgnoreCase((String) redisUtils.get(Constants.REDIS_KEY_CHECK_CODE+checkCodeKey))){
-                throw new BusinessException("图片验证码不正确");
+            if(appConfig.getRunCheckCode()) {
+                //查看redis是否有验证码信息
+                if (!checkCode.equalsIgnoreCase((String) redisUtils.get(Constants.REDIS_KEY_CHECK_CODE + checkCodeKey))) {
+                    throw new BusinessException("图片验证码不正确");
+                }
             }
             UserInfoVO userInfoVO= infoService.login(email,password);
             return getSuccessResponseVO(userInfoVO);
         }finally {
-            redisUtils.delete(Constants.REDIS_KEY_CHECK_CODE+checkCodeKey);
+            if(appConfig.getRunCheckCode()) {
+                redisUtils.delete(Constants.REDIS_KEY_CHECK_CODE + checkCodeKey);
+            }
         }
     }
 
@@ -141,7 +152,7 @@ public class AccountController extends ABaseController{
     @RequestMapping("/setSysSetting")
     public ResponseVO setSysSetting(@NotNull SysSettingVO sysSettingVO){
         if(null==sysSettingVO){
-            throw new BusinessException("系统设置传参失败，请查证后再提交");
+            throw new BusinessException(Constants.SYSSETTING_EXCEPTION_MSG);
         }
         SysSettingDto sysSettingDto=CopyTools.copy(sysSettingVO,SysSettingDto.class);
         redisComponent.setSysSetting(sysSettingDto);

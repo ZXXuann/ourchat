@@ -16,6 +16,16 @@ public class AppConfig {
     private String projectFolder;
     @Value("${admin.emails:}")
     private String adminEmails;
+    @Value("${app.runCheckCode}")
+    private Boolean runCheckCode;
+
+    public Boolean getRunCheckCode() {
+        return runCheckCode;
+    }
+
+    public void setRunCheckCode(Boolean runCheckCode) {
+        this.runCheckCode = runCheckCode;
+    }
 
     public Integer getWsPort() {
         return wsPort;

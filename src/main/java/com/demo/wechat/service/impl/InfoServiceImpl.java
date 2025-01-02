@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.crypto.digest.BCrypt;
 import cn.hutool.system.UserInfo;
 import com.demo.wechat.annotation.GlobalInterceptor;
 import com.demo.wechat.entity.config.AppConfig;
@@ -179,7 +180,7 @@ public class InfoServiceImpl implements InfoService{
 		info.setUserId(userId);
 		info.setEmail(email);
 		info.setNickName(nickname);
-		info.setPassword(password);
+		info.setPassword(BCrypt.hashpw(password));
 		info.setSex(SexEnum.MALE.getSex());
 		info.setAreaName("中国");
 		info.setAreaCode("86");
@@ -198,7 +199,10 @@ public class InfoServiceImpl implements InfoService{
 		if(info==null){
 			throw new BusinessException("账户不存在");
 		}
-		if(!info.getPassword().equals(password)){
+//		if(!info.getPassword().equals(password)){
+//			throw new BusinessException("密码错误");
+//		}
+		if(!BCrypt.checkpw(password,info.getPassword())){
 			throw new BusinessException("密码错误");
 		}
 		if(UserStatusEnum.DISABLE.equals(info.getStatus())){

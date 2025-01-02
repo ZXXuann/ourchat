@@ -64,10 +64,11 @@ public class GlobalOperationAspect {
         ServletRequestAttributes attrs=(ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request= attrs.getRequest();
         String token=request.getHeader("token");
-        TokenUserInfoDto tokenUserInfoDto=(TokenUserInfoDto) redisUtils.get(Constants.REDIS_KEY_WS_TOKEN+token);
         if(StringTools.isEmpty(token)){
             throw new BusinessException(ResponseCodeEnum.CODE_901);
         }
+        TokenUserInfoDto tokenUserInfoDto=(TokenUserInfoDto) redisUtils.get(Constants.REDIS_KEY_WS_TOKEN+token);
+
         if(tokenUserInfoDto==null){
             throw new BusinessException(ResponseCodeEnum.CODE_901);
         }

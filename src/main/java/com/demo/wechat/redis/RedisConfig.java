@@ -19,9 +19,9 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 @Slf4j
 @Configuration
 public class RedisConfig<V> {
-    @Value("${spring.redis.host:}")
+    @Value("${spring.redis.host:localhost}")
     private String redisHost;
-    @Value("${spring.redis.port:}")
+    @Value("${spring.redis.port:6379}")
     private Integer redisPort;
     @Bean(name="redissonClient",destroyMethod = "shutdown")
     public RedissonClient redissonClient(){
